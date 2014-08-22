@@ -5,6 +5,7 @@
 	<title>color game</title>
 	<script src="bower_components/react/react.js"></script>
 	<script src="bower_components/react/JSXTransformer.js"></script>
+	<link href='http://fonts.googleapis.com/css?family=Varela+Round' rel='stylesheet' type='text/css'>
 	<style>
 		#game {
 			margin-bottom: 20px;
@@ -13,7 +14,7 @@
 			overflow: hidden;
 		}
 		.game-cell {
-			border-radius: 50%;
+			/*border-radius: 50%;*/
 			float: left;
 			/*width: 50px;
 			height: 50px;*/
@@ -22,6 +23,9 @@
 			border: 1px solid #ccc;
 			transition: all 300ms ease-in;
 			font-size: 10px;
+			color:#fff;
+			font-family: 'Varela Round', sans-serif;
+			font-weight: bold;
 			text-align: center;
 			cursor: pointer;
 			-webkit-user-select: none;  /* Chrome all / Safari all */
@@ -51,13 +55,13 @@
 		 * @jsx React.DOM
 		 */
 		 var GameStore = {
-		 	gameFieldWidth: 300,
+		 	gameFieldWidth: 400,
 		 	cellStates: [
-		 		'#FFE5FF',
-		 		'#F674F6',
-		 		'#F674B5',
-		 		'#F67474',
-		 		'#F6B574',
+				'#eeddcc',
+				'#ddcccc',
+				'#ccbbbb',
+				'#cc8899',
+		 		'#886688',
 		 		// '#F6F674',
 		 		// '#B5F674',
 		 		// '#74F674'
