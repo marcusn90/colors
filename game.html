@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>color game</title>
+	<script src="bower_components/react/react.js"></script>
+	<script src="bower_components/react/JSXTransformer.js"></script>
+	<style>
+		#game {
+			margin-bottom: 20px;
+		}
+		#field {
+			overflow: hidden;
+		}
+		.game-cell {
+			border-radius: 50%;
+			float: left;
+			/*width: 50px;
+			height: 50px;*/
+			/*padding: 20px;*/
+			box-sizing: border-box;
+			border: 1px solid #ccc;
+			transition: all 300ms ease-in;
+			font-size: 10px;
+			text-align: center;
+			cursor: pointer;
+			-webkit-user-select: none;  /* Chrome all / Safari all */
+			  -moz-user-select: none;     /* Firefox all */
+			  -ms-user-select: none;      /* IE 10+ */
+
+			  /* No support for these yet, use at own risk */
+			  -o-user-select: none;
+			  user-select: none;    
+		}
+		/*.cs-0 { background-color: #fff; }
+		.cs-1 { background-color: #f00; }
+		.cs-2 { background-color: #ff0; }
+		.cs-3 { background-color: #0ff; }*/
+		#cell_state_hint {
+
+		}
+	</style>
+</head>
+<body>
+	<div id="game">
+		
+	</div>
+	<div id="cell_state_hint"></div>
+	<script type="text/jsx">
+		/**
+		 * @jsx React.DOM
+		 */
+		 var GameStore = {
+		 	gameFieldWidth: 300,
+		 	cellStates: [
+		 		'#FFE5FF',
+		 		'#F674F6',
+		 		'#F674B5',
+		 		'#F67474',
+		 		'#F6B574',
+		 		// '#F6F674',
+		 		// '#B5F674',
+		 		// '#74F674'
+		 	],
+		 	// fieldSize: 4,
+		 	// cells: [
+		 	// 	[0,0,0,0],
+		 	// 	[3,0,0,0],
+		 	// 	[0,0,1,0],
+		 	// 	[0,2,0,0]
+		 	// ],
+		 	getCells: function () {
+		 		return this.cells;
+		 	},
+		 	updateHandlers: [],
+		 	addUpdateHandler: function (cb) {
+		 		if ( typeof cb === 'function' ) {
+		 			this.updateHandlers.push(cb);
+		 		}
+		 	},
+		 	onUpdate: function () {
+		 		for ( var i = 0; i < this.updateHandlers.length; i++ ) {
+		 			this.updateHandlers[i]();
+		 		}
+		 	},
+		 	processCellClicked: function (x,y) {
+		 		var limit = Math.min(this.fieldSize, this.cellStates.length);
+		 		console.log(this.fieldSize);
+		 		console.log(this.cellStates.length);
+		 		var range = this.cells[x][y];
+		 		this.cells[x][y] = (this.cells[x][y] + 1) % (limit);
+		 		for ( var i = 1; i <= range; i++ ) {
+		 			if ( x + i < GameStore.fieldSize ) {
+		 				this.cells[x+i][y] = (this.cells[x+i][y] + 1) % (limit);
+		 			}
+		 			if ( x - i >= 0 ) {
+		 				this.cells[x-i][y] = (this.cells[x-i][y] + 1) % (limit);
+		 			}
+		 			
+		 			if ( y + i < GameStore.fieldSize ) {
+		 				this.cells[x][y+i] = (this.cells[x][y+i] + 1) % (limit);
+		 			}
+		 			if ( y - i >= 0 ) {
+		 				this.cells[x][y-i] = (this.cells[x][y-i] + 1) % (limit);
+		 			}
+		 		}
+
+		 		this.onUpdate();
+		 	},
+		 	buildLevel: function ( size ) {
+		 		this.fieldSize = size;
+		 		this.cells = [];
+		 		for ( var i = 0; i < size; i++ ) {
+		 			this.cells[i] = [];
+		 			for ( var j = 0; j < size; j++ ) {
+		 				this.cells[i].push(0);
+		 			}
+		 		}
+		 	}
+		 };
+		 var GameCell = React.createClass({
+		 	handleClick: function () {
+		 		if ( this.props.isClickable === true ) {
+		 			GameStore.processCellClicked(this.props.cellX, this.props.cellY);
+		 		}
+		 	},
+		 	render: function () {
+		 		var w = GameStore.gameFieldWidth / GameStore.fieldSize;
+		 		var style = {
+		 			width: w + 'px',
+		 			height: w + 'px',
+		 			lineHeight: w + 'px',
+		 			backgroundColor: GameStore.cellStates[this.props.cellStateIndex]
+		 		};
+		 		return <div style={style} onClick={this.handleClick} className={'game-cell cs-'+this.props.cellStateIndex}>{this.props.cellStateIndex}</div>
+		 	}
+		 });
+		 var GameField = React.createClass({
+		 	getInitialState: function () {
+		 		return {
+		 			cells: GameStore.getCells()
+		 		}
+		 	},
+		 	componentDidMount: function () {
+		 		GameStore.addUpdateHandler(function () {
+		 			this.setState({
+		 				cells: GameStore.getCells()
+		 			});
+		 		}.bind(this));
+		 	},
+		 	render: function () {
+		 		var cells = this.state.cells;
+		 		var s = GameStore.fieldSize;
+		 		var elems = [];
+		 		for(var i = 0; i < s; i++){
+		 			for(var j = 0; j < s; j++){
+		 				elems.push(<GameCell isClickable={true} cellX={i} cellY={j} cellStateIndex={cells[i][j]} />);
+		 			}
+
+		 		}
+		 		var style = {
+		 			width: GameStore.gameFieldWidth + 'px',
+		 			height: GameStore.gameFieldWidth + 'px'
+		 		};
+		 		return (
+		 			<div id="field" style={style}>
+		 				{elems}
+		 			</div>
+		 		);
+		 	}
+		 });
+
+		 var GameCellHint = React.createClass({
+		 	render: function () {
+		 		var style = {
+		 			width: GameStore.gameFieldWidth + 'px',
+		 			height: (GameStore.gameFieldWidth / GameStore.fieldSize) + 'px',
+		 		};
+		 		var cells = GameStore.cellStates.map(function (cs, ind) {
+		 			return <GameCell isClickable={false} cellStateIndex={ind} />
+		 		});
+		 		return (
+		 			<div style={style}>
+		 				<h2>Hint</h2>
+		 				{ cells }
+		 			</div>
+		 		);
+		 	}
+		 });
+
+		 GameStore.buildLevel(10);
+		 React.renderComponent(
+		 	<GameField />,
+		 	document.getElementById('game')
+		 );
+		 React.renderComponent(
+		 	<GameCellHint />,
+		 	document.getElementById('cell_state_hint')
+		 );
+	</script>
+</body>
+</html>
